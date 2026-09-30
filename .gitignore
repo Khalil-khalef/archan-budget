@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# club data (kept locally only, not part of the app source)
+*.xlsx
