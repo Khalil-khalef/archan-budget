@@ -30,6 +30,14 @@ export type Ledger = {
   donations: Donation[];
 };
 
+export type User = {
+  id: string;
+  telephone: string;
+  mot_de_passe_hash: string;
+  nom: string;
+  actif: boolean;
+};
+
 const SHEET_SCHEMAS = {
   Categories: ["id", "nom"],
   Depenses: [
@@ -44,6 +52,7 @@ const SHEET_SCHEMAS = {
     "annule_le",
   ],
   Dons: ["id", "montant", "date", "annule"],
+  Utilisateurs: ["id", "telephone", "mot_de_passe_hash", "nom", "actif"],
 } as const;
 
 type SheetName = keyof typeof SHEET_SCHEMAS;
@@ -246,6 +255,25 @@ export async function addDonation(montant: number): Promise<Donation> {
   };
   await sheet.addRow({ ...donation, annule: "FALSE" });
   return donation;
+}
+
+// ---------- Utilisateurs ----------
+
+export async function findActiveUserByPhone(
+  telephone: string
+): Promise<User | null> {
+  const sheet = await getSheet("Utilisateurs");
+  const rows = await sheet.getRows();
+  const row = rows.find((r) => r.get("telephone") === telephone);
+  if (!row) return null;
+  if (!bool(row.get("actif"))) return null;
+  return {
+    id: String(row.get("id")),
+    telephone: String(row.get("telephone")),
+    mot_de_passe_hash: String(row.get("mot_de_passe_hash")),
+    nom: String(row.get("nom") ?? ""),
+    actif: true,
+  };
 }
 
 // ---------- Ledger (aggregate) ----------

@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import * as sheets from "@/lib/sheets";
+import { clearSessionCookie, requireSession } from "@/lib/session";
 
 function requireString(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -27,7 +29,13 @@ function optionalNumber(formData: FormData, key: string, fallback: number) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+export async function logoutAction() {
+  await clearSessionCookie();
+  redirect("/connexion");
+}
+
 export async function addDonationAction(formData: FormData) {
+  await requireSession();
   const montant = requireNumber(formData, "montant");
   if (montant <= 0) throw new Error("المبلغ يجب أن يكون أكبر من صفر");
   await sheets.addDonation(montant);
@@ -35,6 +43,7 @@ export async function addDonationAction(formData: FormData) {
 }
 
 export async function createCategoryAction(formData: FormData) {
+  await requireSession();
   const nom = requireString(formData, "nom");
   const category = await sheets.createCategory(nom);
   revalidatePath("/");
@@ -42,11 +51,13 @@ export async function createCategoryAction(formData: FormData) {
 }
 
 export async function deleteCategoryAction(categoryId: string) {
+  await requireSession();
   await sheets.deleteCategory(categoryId);
   revalidatePath("/");
 }
 
 export async function addExpenseAction(formData: FormData) {
+  await requireSession();
   const categorieId = requireString(formData, "categorieId");
   const nom = requireString(formData, "nom");
   const quantite = optionalNumber(formData, "quantite", 1);
@@ -56,6 +67,7 @@ export async function addExpenseAction(formData: FormData) {
 }
 
 export async function updateExpenseAction(expenseId: string, formData: FormData) {
+  await requireSession();
   const categorieId = requireString(formData, "categorieId");
   const nom = requireString(formData, "nom");
   const quantite = optionalNumber(formData, "quantite", 1);
@@ -65,12 +77,14 @@ export async function updateExpenseAction(expenseId: string, formData: FormData)
 }
 
 export async function cancelExpenseAction(expenseId: string, formData: FormData) {
+  await requireSession();
   const motif = requireString(formData, "motif");
   await sheets.cancelExpense(expenseId, motif);
   revalidatePath("/");
 }
 
 export async function restoreExpenseAction(expenseId: string) {
+  await requireSession();
   await sheets.restoreExpense(expenseId);
   revalidatePath("/");
 }

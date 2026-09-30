@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getFullLedger } from "@/lib/sheets";
 import {
   balance,
@@ -5,12 +6,23 @@ import {
   totalActiveExpenses,
 } from "@/lib/budget-calc";
 import { formatDate, formatNumber } from "@/lib/format";
+import { getSession } from "@/lib/session";
 import LedgerBoard from "@/components/LedgerBoard";
+import { logoutAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const session = await getSession();
+  const canEdit = !!session;
+
   const { categories, donations } = await getFullLedger();
+  const visibleCategories = canEdit
+    ? categories
+    : categories.map((c) => ({
+        ...c,
+        expenses: c.expenses.filter((e) => !e.annule),
+      }));
 
   const donationsTotal = totalActiveDonations(donations);
   const expensesTotal = totalActiveExpenses(categories);
@@ -21,26 +33,53 @@ export default async function HomePage() {
       <header className="rounded-xl bg-primary p-5 text-white">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="text-sm">ميزانية بتاريخ {formatDate(new Date())}</span>
-          <div className="flex gap-2">
-            <a
-              href="/print"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-lg border border-white/40 px-3 py-1.5 text-sm text-white hover:bg-white/10"
-            >
-              تصدير PDF ⬇
-            </a>
-            <a
-              href="/api/export/excel"
-              className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-primary hover:bg-white/90"
-            >
-              تصدير Excel ⬇
-            </a>
-          </div>
+          {canEdit && (
+            <div className="flex gap-2">
+              <a
+                href="/print"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-white/40 px-3 py-1.5 text-sm text-white hover:bg-white/10"
+              >
+                تصدير PDF ⬇
+              </a>
+              <a
+                href="/api/export/excel"
+                className="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-primary hover:bg-white/90"
+              >
+                تصدير Excel ⬇
+              </a>
+            </div>
+          )}
         </div>
         <h1 className="mt-3 text-xl font-bold sm:text-2xl">
           ميزانية نادي آرشان الثقافي
         </h1>
+        <div
+          className="mt-3 flex items-center justify-between border-t pt-3 text-[13px]"
+          style={{ borderColor: "rgba(255,255,255,.18)" }}
+        >
+          <span>
+            {canEdit ? "وضع التعديل" : "وضع العرض فقط — سجّل الدخول للتعديل"}
+          </span>
+          {canEdit ? (
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="rounded-lg border border-white/40 px-3 py-1 hover:bg-white/10"
+              >
+                تسجيل الخروج
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/connexion"
+              className="rounded-lg border border-white/40 px-3 py-1 hover:bg-white/10"
+            >
+              تسجيل الدخول
+            </Link>
+          )}
+        </div>
       </header>
 
       <div
@@ -71,7 +110,11 @@ export default async function HomePage() {
         </div>
       </div>
 
-      <LedgerBoard categories={categories} donations={donations} />
+      <LedgerBoard
+        categories={visibleCategories}
+        donations={donations}
+        canEdit={canEdit}
+      />
     </main>
   );
 }

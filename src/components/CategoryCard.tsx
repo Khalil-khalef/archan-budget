@@ -9,17 +9,19 @@ import { deleteCategoryAction } from "@/app/actions";
 export default function CategoryCard({
   category,
   showCancelled,
+  canEdit,
   onRowClick,
 }: {
   category: Category & { expenses: Expense[] };
   showCancelled: boolean;
+  canEdit: boolean;
   onRowClick: (expense: Expense) => void;
 }) {
   const [isPending, startTransition] = useTransition();
 
   const rows = category.expenses.filter((e) => !e.annule || showCancelled);
   const subtotal = categoryActiveTotal(category);
-  const canDelete = category.expenses.length === 0;
+  const canDelete = canEdit && category.expenses.length === 0;
 
   const handleDelete = () => {
     startTransition(async () => {
@@ -30,6 +32,9 @@ export default function CategoryCard({
       }
     });
   };
+
+  const rowGridClass =
+    "grid w-full grid-cols-[minmax(0,1fr)_44px_72px_80px] gap-1 border-t border-separator px-3 py-2.5 text-start text-[13px] sm:grid-cols-[minmax(0,1fr)_70px_110px_110px] sm:gap-2 sm:px-4 sm:text-sm";
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-white">
@@ -58,34 +63,51 @@ export default function CategoryCard({
         <p className="px-4 py-3 text-sm text-text-secondary">لا توجد مصاريف</p>
       )}
 
-      {rows.map((expense) => (
-        <button
-          key={expense.id}
-          type="button"
-          onClick={() => onRowClick(expense)}
-          className={`grid w-full grid-cols-[minmax(0,1fr)_44px_72px_80px] gap-1 border-t border-separator px-3 py-2.5 text-start text-[13px] hover:bg-row-hover sm:grid-cols-[minmax(0,1fr)_70px_110px_110px] sm:gap-2 sm:px-4 sm:text-sm ${
-            expense.annule ? "text-[#8A9A9F] line-through" : "text-text"
-          }`}
-        >
-          <span className="flex flex-wrap items-center gap-1.5">
-            {expense.nom}
-            {expense.annule && (
-              <span className="rounded-full bg-danger-bg px-2 py-0.5 text-[11px] font-medium text-danger no-underline">
-                ملغى
-              </span>
-            )}
-          </span>
-          <span className="text-center tabular-nums text-text-secondary">
-            {expense.quantite}
-          </span>
-          <span className="tabular-nums text-text-secondary">
-            {formatNumber(expense.prix_unitaire)}
-          </span>
-          <span className="tabular-nums text-text-secondary">
-            {formatNumber(expenseTotal(expense))}
-          </span>
-        </button>
-      ))}
+      {rows.map((expense) => {
+        const content = (
+          <>
+            <span className="flex flex-wrap items-center gap-1.5">
+              {expense.nom}
+              {expense.annule && (
+                <span className="rounded-full bg-danger-bg px-2 py-0.5 text-[11px] font-medium text-danger no-underline">
+                  ملغى
+                </span>
+              )}
+            </span>
+            <span className="text-center tabular-nums text-text-secondary">
+              {expense.quantite}
+            </span>
+            <span className="tabular-nums text-text-secondary">
+              {formatNumber(expense.prix_unitaire)}
+            </span>
+            <span className="tabular-nums text-text-secondary">
+              {formatNumber(expenseTotal(expense))}
+            </span>
+          </>
+        );
+
+        const colorClass = expense.annule
+          ? "text-[#8A9A9F] line-through"
+          : "text-text";
+
+        return canEdit ? (
+          <button
+            key={expense.id}
+            type="button"
+            onClick={() => onRowClick(expense)}
+            className={`${rowGridClass} hover:bg-row-hover ${colorClass}`}
+          >
+            {content}
+          </button>
+        ) : (
+          <div
+            key={expense.id}
+            className={`${rowGridClass} cursor-default ${colorClass}`}
+          >
+            {content}
+          </div>
+        );
+      })}
 
       <div className="flex items-center justify-between bg-subtotal-bg px-4 py-2.5 text-sm font-semibold text-subtotal-text">
         <span>المجموع</span>

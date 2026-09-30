@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getFullLedger } from "@/lib/sheets";
 import {
   activeExpenses,
@@ -8,6 +9,7 @@ import {
   totalActiveExpenses,
 } from "@/lib/budget-calc";
 import { formatDate, formatNumber } from "@/lib/format";
+import { getSession } from "@/lib/session";
 import PrintTrigger from "./PrintTrigger";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +19,9 @@ const SUBTOTAL_BG = "#B8CCE4";
 const SUBTOTAL_TEXT = "#1F3F5A";
 
 export default async function PrintPage() {
+  const session = await getSession();
+  if (!session) redirect("/connexion");
+
   const { categories, donations } = await getFullLedger();
   const donationsTotal = totalActiveDonations(donations);
   const expensesTotal = totalActiveExpenses(categories);

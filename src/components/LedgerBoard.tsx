@@ -12,9 +12,11 @@ import type { Donation } from "@/lib/sheets";
 export default function LedgerBoard({
   categories,
   donations,
+  canEdit,
 }: {
   categories: (Category & { expenses: Expense[] })[];
   donations: Donation[];
+  canEdit: boolean;
 }) {
   const [showCancelled, setShowCancelled] = useState(false);
   const [donationModalOpen, setDonationModalOpen] = useState(false);
@@ -27,7 +29,7 @@ export default function LedgerBoard({
 
   return (
     <div className="space-y-4">
-      {cancelledCount > 0 && (
+      {canEdit && cancelledCount > 0 && (
         <div className="flex justify-center">
           <button
             type="button"
@@ -39,38 +41,42 @@ export default function LedgerBoard({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-5">
-        <div>
-          <p className="text-lg font-semibold text-text">مجموع التبرعات</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums text-primary">
-            MRO {formatNumber(donationsTotal)}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setDonationModalOpen(true)}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-        >
-          + إضافة تبرع
-        </button>
-      </div>
-
-      <div>
-        <div className="mb-3 flex items-center justify-between">
+      {canEdit && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-5">
           <div>
-            <h2 className="text-lg font-semibold text-text">المصاريف</h2>
-            <p className="text-xs text-text-secondary">
-              اضغط على مصروف لتعديله أو إلغائه
+            <p className="text-lg font-semibold text-text">مجموع التبرعات</p>
+            <p className="mt-1 text-2xl font-bold tabular-nums text-primary">
+              MRO {formatNumber(donationsTotal)}
             </p>
           </div>
           <button
             type="button"
-            onClick={() => setExpenseModal({ mode: "add" })}
+            onClick={() => setDonationModalOpen(true)}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
           >
-            + إضافة مصروف
+            + إضافة تبرع
           </button>
         </div>
+      )}
+
+      <div>
+        {canEdit && (
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-text">المصاريف</h2>
+              <p className="text-xs text-text-secondary">
+                اضغط على مصروف لتعديله أو إلغائه
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setExpenseModal({ mode: "add" })}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+            >
+              + إضافة مصروف
+            </button>
+          </div>
+        )}
 
         <div className="space-y-4">
           {categories.map((category) => (
@@ -78,17 +84,18 @@ export default function LedgerBoard({
               key={category.id}
               category={category}
               showCancelled={showCancelled}
+              canEdit={canEdit}
               onRowClick={(expense) => setExpenseModal({ mode: "edit", expense })}
             />
           ))}
         </div>
       </div>
 
-      {donationModalOpen && (
+      {canEdit && donationModalOpen && (
         <AddDonationModal onClose={() => setDonationModalOpen(false)} />
       )}
 
-      {expenseModal && (
+      {canEdit && expenseModal && (
         <ExpenseModal
           categories={categories}
           expense={expenseModal.mode === "edit" ? expenseModal.expense : undefined}
