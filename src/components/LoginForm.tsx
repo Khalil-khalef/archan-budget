@@ -95,10 +95,10 @@ export default function LoginForm() {
             <input
               name="password"
               type={showPassword ? "text" : "password"}
-              dir="rtl"
+              dir="ltr"
               value={password}
               onChange={(e) => handlePasswordChange(e.target.value)}
-              className="min-w-0 flex-1 py-2.5 text-right text-sm focus:outline-none"
+              className="min-w-0 flex-1 py-2.5 text-left text-sm focus:outline-none"
             />
           </div>
           {passwordError && (
