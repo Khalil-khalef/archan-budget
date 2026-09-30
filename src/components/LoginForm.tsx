@@ -80,24 +80,26 @@ export default function LoginForm() {
             كلمة المرور
           </label>
           <div
-            className={`flex items-center rounded-lg border px-3 ${
+            className={`flex items-center gap-2 rounded-lg border px-3 ${
               passwordError ? "border-danger" : "border-border"
             }`}
           >
-            <input
-              name="password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => handlePasswordChange(e.target.value)}
-              className="min-w-0 flex-1 py-2.5 text-sm focus:outline-none"
-            />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="shrink-0 text-sm font-medium text-primary"
+              aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+              className="shrink-0 text-text-secondary hover:text-primary"
             >
-              {showPassword ? "إخفاء" : "إظهار"}
+              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
             </button>
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              dir="rtl"
+              value={password}
+              onChange={(e) => handlePasswordChange(e.target.value)}
+              className="min-w-0 flex-1 py-2.5 text-right text-sm focus:outline-none"
+            />
           </div>
           {passwordError && (
             <p className="mt-1 text-xs text-danger">يرجى إدخال كلمة المرور</p>
@@ -137,5 +139,34 @@ export default function LoginForm() {
         للحصول على حساب، تواصل مع مسؤول النادي
       </div>
     </div>
+  );
+}
+
+function EyeIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+  );
+}
+
+function EyeOffIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M3 3l18 18M10.6 5.2C11.05 5.07 11.52 5 12 5c7 0 11 7 11 7-.63 1.11-1.43 2.2-2.4 3.16M6.6 6.6C3.9 8.3 2 12 2 12s4 7 11 7c1.4 0 2.67-.28 3.8-.75M9.9 9.9a3 3 0 0 0 4.2 4.2"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
