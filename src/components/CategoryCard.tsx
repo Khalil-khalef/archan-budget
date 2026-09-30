@@ -110,7 +110,7 @@ export default function CategoryCard({
       })}
 
       <div className="flex items-center justify-between bg-subtotal-bg px-4 py-2.5 text-sm font-semibold text-subtotal-text">
-        <span>المجموع</span>
+        <span>مجموع {category.nom}</span>
         <span className="tabular-nums">{formatNumber(subtotal)}</span>
       </div>
     </div>

@@ -114,7 +114,7 @@ export default async function PrintPage() {
               className="flex items-center justify-between rounded-b-lg px-4 py-1.5 font-semibold"
               style={{ backgroundColor: SUBTOTAL_BG, color: SUBTOTAL_TEXT }}
             >
-              <span>المجموع</span>
+              <span>مجموع {category.nom}</span>
               <span className="tabular-nums">
                 {formatNumber(categoryActiveTotal(category))}
               </span>

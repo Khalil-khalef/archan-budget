@@ -124,7 +124,7 @@ export function buildLedgerWorkbook(ledger: Ledger) {
     // مجموع التصنيف
     {
       const r = sheet.getRow(rowIndex);
-      r.getCell(1).value = "المجموع";
+      r.getCell(1).value = `مجموع ${category.nom}`;
       r.getCell(4).value = { formula: `SUM(D${firstItemRow}:D${lastItemRow})` };
       sheet.mergeCells(rowIndex, 1, rowIndex, 3);
       setRowFill(r, SUBTOTAL_BG);
